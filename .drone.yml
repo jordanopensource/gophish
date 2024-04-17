@@ -1,0 +1,87 @@
+# Drone CI File!
+
+# Branch Pipeline
+kind: pipeline
+type: kubernetes
+name: build branch
+
+metadata:
+  namespace: builds
+node_selector:
+  doks.digitalocean.com/node-pool: josa-cloud-np
+steps:
+  - name: build
+    image: plugins/docker
+    settings:
+      repo: josaorg/ar-web
+      build_args: [USER=1001]
+      build_args_from_env:
+        [
+          DRONE_BUILD_NUMBER,
+          DRONE_BUILD_LINK,
+          DRONE_COMMIT_SHA,
+          DRONE_COMMIT_LINK,
+          DRONE_REPO_LINK,
+          DRONE_BUILD_FINISHED,
+        ]
+      tags:
+        - ${DRONE_COMMIT_SHA}
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+  - name: notify
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_webhook
+      channel: heartbeat
+    depends_on:
+      - build
+trigger:
+  branch:
+    exclude:
+      - development
+      - main
+---
+kind: pipeline
+type: kubernetes
+name: build development
+
+metadata:
+  namespace: builds
+node_selector:
+  doks.digitalocean.com/node-pool: josa-cloud-np
+steps:
+  - name: build
+    image: plugins/docker
+    settings:
+      repo: josaorg/gophish
+      build_args: [USER=1001]
+      build_args_from_env:
+        [
+          DRONE_BUILD_NUMBER,
+          DRONE_BUILD_LINK,
+          DRONE_COMMIT_SHA,
+          DRONE_COMMIT_LINK,
+          DRONE_REPO_LINK,
+          DRONE_BUILD_FINISHED,
+        ]
+      tags:
+        - ${DRONE_COMMIT_SHA}
+        - latest
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+  - name: notify
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_webhook
+      channel: heartbeat
+    depends_on:
+      - build
+trigger:
+  branch:
+    - master

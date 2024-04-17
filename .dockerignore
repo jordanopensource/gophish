@@ -26,10 +26,7 @@ LICENSE
 .env
 .env.*
 
-# editot configs
+# editor configs
 .eslintrc.*
 .prettierrc
-
-# other
-VERSION
 

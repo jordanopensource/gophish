@@ -56,7 +56,7 @@ steps:
       repo: *docker_repo
       dockerfile: ./Dockerfile
       tags:
-        - ${CI_COMMIT_SHA:-stable}
+        - ${CI_COMMIT_SHA:-latest}
         - stable
       username:
         from_secret: DOCKER_HUB_USERNAME
